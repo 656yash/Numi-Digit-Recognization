@@ -1,10 +1,5 @@
 from flask import Flask, render_template, request, jsonify
-
-try:
-    from tflite_runtime.interpreter import Interpreter
-except ImportError:
-    from tensorflow.lite.python.interpreter import Interpreter
-
+from tflite_runtime.interpreter import Interpreter
 import numpy as np
 from PIL import Image
 import io
