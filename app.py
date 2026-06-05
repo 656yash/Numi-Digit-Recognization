@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, jsonify
-import tensorflow as tf
+from tflite_runtime.interpreter import Interpreter
 import numpy as np
 from PIL import Image
 import io
@@ -7,8 +7,12 @@ import base64
 
 app = Flask(__name__)
 
-# Load model
-model = tf.keras.models.load_model('model/mnist_cnn.h5')
+MODEL_PATH = 'model/mnist_cnn.tflite'
+
+interpreter = Interpreter(model_path=MODEL_PATH)
+interpreter.allocate_tensors()
+input_details = interpreter.get_input_details()
+output_details = interpreter.get_output_details()
 
 @app.route('/')
 def home():
@@ -20,19 +24,21 @@ def predict():
         data = request.get_json()
         image_data = base64.b64decode(data['image'].split(',')[1])
         image = Image.open(io.BytesIO(image_data))
-        
+
         # Preprocess
         image = image.convert('L').resize((28, 28))
-        img_array = 255 - np.array(image)  # Invert
-        img_array = img_array.reshape(1, 28, 28, 1).astype('float32') / 255.0
-        
-        # Predict
-        pred = model.predict(img_array)
+        img_array = 255 - np.array(image)
+        img_array = img_array.reshape(1, 28, 28, 1).astype(np.float32) / 255.0
+
+        interpreter.set_tensor(input_details[0]['index'], img_array)
+        interpreter.invoke()
+        pred = interpreter.get_tensor(output_details[0]['index'])
+
         return jsonify({
             'digit': int(np.argmax(pred)),
             'confidence': float(np.max(pred))
         })
-    
+
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 

@@ -1,4 +1,4 @@
 Flask
-tensorflow
 numpy
-pillow
+Pillow
+tflite-runtime==2.11.0
