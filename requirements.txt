@@ -1,4 +1,4 @@
 Flask
 numpy<2
 Pillow
-tensorflow-cpu==2.21.0
+tensorflow-cpu==2.20.0
