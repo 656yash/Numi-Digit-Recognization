@@ -1,6 +1,10 @@
 import os
 from flask import Flask, render_template, request, jsonify
-from tensorflow.lite.python.interpreter import Interpreter
+try:
+    import tflite_runtime.interpreter as tflite
+    Interpreter = tflite.Interpreter
+except ImportError:
+    from tensorflow.lite.python.interpreter import Interpreter
 import numpy as np
 from PIL import Image
 import io
@@ -8,7 +12,9 @@ import base64
 
 app = Flask(__name__)
 
-MODEL_PATH = 'model/mnist_cnn.tflite'
+# Ensure model path is absolute to avoid issues on Vercel
+base_dir = os.path.dirname(os.path.abspath(__file__))
+MODEL_PATH = os.path.join(base_dir, 'model', 'mnist_cnn.tflite')
 
 interpreter = Interpreter(model_path=MODEL_PATH)
 interpreter.allocate_tensors()
