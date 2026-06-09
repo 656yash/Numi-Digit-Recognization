@@ -1,10 +1,14 @@
 import os
 from flask import Flask, render_template, request, jsonify
 try:
-    import tflite_runtime.interpreter as tflite
+    import ai_edge_litert.interpreter as tflite
     Interpreter = tflite.Interpreter
 except ImportError:
-    from tensorflow.lite.python.interpreter import Interpreter
+    try:
+        import tflite_runtime.interpreter as tflite
+        Interpreter = tflite.Interpreter
+    except ImportError:
+        from tensorflow.lite.python.interpreter import Interpreter
 import numpy as np
 from PIL import Image
 import io
